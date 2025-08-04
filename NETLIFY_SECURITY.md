@@ -9,6 +9,8 @@ Netlify's secrets scanning has been configured to allow the following environmen
 - **`REACT_APP_SUPABASE_URL`** - Public Supabase project URL
 - **`REACT_APP_SUPABASE_ANON_KEY`** - Public anonymous key (designed for frontend use)
 - **`REACT_APP_API_BASE_URL`** - Public API endpoint URL
+- **`REACT_APP_ENV`** - Environment indicator (production/development)
+- **`NPM_FLAGS`** - Build configuration flags (--production=false)
 
 ### Why These Are Safe:
 
@@ -18,11 +20,13 @@ Netlify's secrets scanning has been configured to allow the following environmen
 
 3. **React Environment Variables**: Any `REACT_APP_*` variable is automatically included in the frontend bundle and is meant to be public.
 
+4. **Build Configuration**: `NPM_FLAGS` and similar build-time variables are configuration settings, not secrets.
+
 ### Configuration in netlify.toml:
 
 ```toml
 [build.environment]
-  SECRETS_SCAN_OMIT_KEYS = "REACT_APP_SUPABASE_URL,REACT_APP_SUPABASE_ANON_KEY,REACT_APP_API_BASE_URL"
+  SECRETS_SCAN_OMIT_KEYS = "REACT_APP_SUPABASE_URL,REACT_APP_SUPABASE_ANON_KEY,REACT_APP_API_BASE_URL,REACT_APP_ENV,NPM_FLAGS"
 ```
 
 ### What Remains Protected:

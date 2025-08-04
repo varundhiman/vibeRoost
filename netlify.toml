@@ -7,7 +7,7 @@
   NODE_VERSION = "18"
   NPM_FLAGS = "--production=false"
   # Disable secrets scanning for expected public frontend environment variables
-  SECRETS_SCAN_OMIT_KEYS = "REACT_APP_SUPABASE_URL,REACT_APP_SUPABASE_ANON_KEY,REACT_APP_API_BASE_URL"
+  SECRETS_SCAN_OMIT_KEYS = "REACT_APP_SUPABASE_URL,REACT_APP_SUPABASE_ANON_KEY,REACT_APP_API_BASE_URL,REACT_APP_ENV,NPM_FLAGS"
 
 [[redirects]]
   from = "/*"
