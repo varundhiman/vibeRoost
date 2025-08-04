@@ -146,10 +146,12 @@ const CommunitiesPage: React.FC = () => {
             </p>
           </div>
           <div className="mt-4 sm:mt-0">
-            <Button>
-              <PlusIcon className="h-5 w-5 mr-2" />
-              Create Community
-            </Button>
+            <Link to="/communities/create">
+              <Button>
+                <PlusIcon className="h-5 w-5 mr-2" />
+                Create Community
+              </Button>
+            </Link>
           </div>
         </div>
 

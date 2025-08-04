@@ -17,6 +17,7 @@ import DashboardPage from './pages/DashboardPage';
 import ProfilePage from './pages/ProfilePage';
 import CommunitiesPage from './pages/Communities/CommunitiesPage';
 import CommunityDetailPage from './pages/Communities/CommunityDetailPage';
+import CreateCommunityPage from './pages/Communities/CreateCommunityPage';
 import ReviewsPage from './pages/Reviews/ReviewsPage';
 import CreateReviewPage from './pages/Reviews/CreateReviewPage';
 import ReviewDetailPage from './pages/Reviews/ReviewDetailPage';
@@ -98,6 +99,10 @@ const AppContent: React.FC = () => {
         <Route 
           path="/communities" 
           element={isAuthenticated ? <CommunitiesPage /> : <Navigate to="/login" replace />} 
+        />
+        <Route 
+          path="/communities/create" 
+          element={isAuthenticated ? <CreateCommunityPage /> : <Navigate to="/login" replace />} 
         />
         <Route 
           path="/communities/:id" 

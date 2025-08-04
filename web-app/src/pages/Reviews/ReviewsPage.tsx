@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
-import { 
+import {
   PlusIcon,
   StarIcon,
   MagnifyingGlassIcon
@@ -67,7 +67,7 @@ const ReviewsPage: React.FC = () => {
       try {
         setLoading(true);
         const result = await sdk.reviews.getReviews(1, 20, selectedCommunity || undefined);
-        
+
         if (result.success && result.data) {
           setReviews(result.data.data || []);
           setHasMore(result.data.pagination?.has_more || false);
@@ -96,7 +96,7 @@ const ReviewsPage: React.FC = () => {
     const fetchCommunities = async () => {
       try {
         const result = await sdk.communities.getCommunities();
-        
+
         if (result.success && result.data) {
           setCommunities(result.data.data || []);
         }
@@ -112,7 +112,7 @@ const ReviewsPage: React.FC = () => {
     try {
       const nextPage = page + 1;
       const result = await sdk.reviews.getReviews(nextPage, 20, selectedCommunity || undefined);
-      
+
       if (result.success && result.data) {
         setReviews(prev => [...prev, ...(result.data.data || [])]);
         setPage(nextPage);
@@ -151,20 +151,19 @@ const ReviewsPage: React.FC = () => {
               {[...Array(5)].map((_, i) => (
                 <StarIcon
                   key={i}
-                  className={`h-4 w-4 ${
-                    i < (review.rating || 0)
+                  className={`h-4 w-4 ${i < (review.rating || 0)
                       ? 'text-yellow-400 fill-current'
                       : 'text-secondary-300'
-                  }`}
+                    }`}
                 />
               ))}
             </div>
           </div>
-          
+
           <p className="text-sm text-secondary-700 mt-2 line-clamp-2">
             {review.description || review.content || 'No description available'}
           </p>
-          
+
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center space-x-4 text-sm text-secondary-500">
               <span>By {review.author || 'Unknown'}</span>
@@ -221,9 +220,9 @@ const ReviewsPage: React.FC = () => {
               />
             </div>
           </div>
-          
+
           <div className="flex space-x-2">
-            <select 
+            <select
               className="block w-full pl-3 pr-10 py-2 text-base border-secondary-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md"
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
@@ -237,8 +236,8 @@ const ReviewsPage: React.FC = () => {
               <option value="VACATION_SPOT">Vacation Spots</option>
               <option value="RECIPE">Recipes</option>
             </select>
-            
-            <select 
+
+            <select
               className="block w-full pl-3 pr-10 py-2 text-base border-secondary-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md"
               value={selectedCommunity}
               onChange={(e) => setSelectedCommunity(e.target.value)}
@@ -283,7 +282,7 @@ const ReviewsPage: React.FC = () => {
             </div>
             <h3 className="text-lg font-medium text-secondary-900 mb-2">No reviews found</h3>
             <p className="text-secondary-600 mb-6">
-              {selectedCommunity || selectedType 
+              {selectedCommunity || selectedType
                 ? 'Try adjusting your filters or create the first review for this selection.'
                 : 'Be the first to write a review in your communities!'
               }
