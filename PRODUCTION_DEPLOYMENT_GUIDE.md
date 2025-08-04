@@ -9,7 +9,7 @@ First, you need to link your local Supabase project to your production instance:
 supabase login
 
 # Link to your production project
-supabase link --project-ref ovjsvutuyfuiomgwbfzt
+supabase link --project-ref your-project-id
 ```
 
 When prompted, enter your database password: `Infy@2302421`
@@ -42,13 +42,13 @@ Your Edge Functions need environment variables in production. Set them using:
 
 ```bash
 # Set the JWT secret for Edge Functions
-supabase secrets set SUPABASE_JWT_SECRET=jaH5uLyM1uStdL3H7kRuSKObcRslNEOqmW2fLY4DUEtlXraf0OAN4exRh85X3etOHbh1DihS18B13BCZdtzaBQ==
+supabase secrets set JWT_SECRET=your-jwt-secret
 
 # Set the service role key
-supabase secrets set SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92anN2dXR1eWZ1aW9tZ3diZnp0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDE4NjE5NiwiZXhwIjoyMDY5NzYyMTk2fQ.6fNyhWAKlbGA8Q1qdRzZXRWcw8eRTYZjgyHUIl22XZ4
+supabase secrets set SERVICE_ROLE_KEY=your-service-role-key
 
 # Set the database URL
-supabase secrets set SUPABASE_URL=https://ovjsvutuyfuiomgwbfzt.supabase.co
+supabase secrets set SUPABASE_URL=https://your-project.supabase.co
 
 # If you have external API keys, set them too (example):
 # supabase secrets set YELP_API_KEY=your_yelp_api_key
@@ -74,18 +74,18 @@ npm start
 ## Step 6: Verify Everything Works
 
 1. **Frontend**: http://localhost:3000
-2. **Supabase Dashboard**: https://supabase.com/dashboard/project/ovjsvutuyfuiomgwbfzt
-3. **Edge Functions**: https://ovjsvutuyfuiomgwbfzt.supabase.co/functions/v1/
+2. **Supabase Dashboard**: https://supabase.com/dashboard/project/your-project-id
+3. **Edge Functions**: https://your-project.supabase.co/functions/v1/
 
 ## Troubleshooting
 
 ### If Edge Functions fail to deploy:
 ```bash
 # Check function logs
-supabase functions logs --project-ref ovjsvutuyfuiomgwbfzt
+supabase functions logs --project-ref your-project-id
 
 # Test individual function
-supabase functions serve users --project-ref ovjsvutuyfuiomgwbfzt
+supabase functions serve users --project-ref your-project-id
 ```
 
 ### If frontend can't connect:

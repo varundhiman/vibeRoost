@@ -9,10 +9,10 @@ echo "🚀 Starting Social Recommendation App (Production Mode)"
 echo "=================================================="
 
 # Check if we're linked to production
-if ! supabase status --project-ref ovjsvutuyfuiomgwbfzt &>/dev/null; then
+if ! supabase status &>/dev/null; then
     echo "⚠️  Not linked to production Supabase project."
     echo "Run the following command first:"
-    echo "supabase link --project-ref ovjsvutuyfuiomgwbfzt"
+    echo "supabase link --project-ref your-project-id"
     exit 1
 fi
 
@@ -30,7 +30,7 @@ echo "✅ Frontend shared library built"
 # Start the web app
 echo "🌐 Starting web application..."
 echo "Frontend will be available at: http://localhost:3000"
-echo "Supabase Dashboard: https://supabase.com/dashboard/project/ovjsvutuyfuiomgwbfzt"
+echo "Supabase Dashboard: https://supabase.com/dashboard/project/[your-project-id]"
 echo ""
 echo "Press Ctrl+C to stop the application"
 

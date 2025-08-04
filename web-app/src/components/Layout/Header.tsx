@@ -15,7 +15,7 @@ import { selectUser, clearAuth, SocialRecSDK } from '@socialrec/frontend-shared'
 const sdk = new SocialRecSDK({
   auth: {
     supabaseUrl: process.env.REACT_APP_SUPABASE_URL || 'http://localhost:54321',
-    supabaseAnonKey: process.env.REACT_APP_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvY2FsaG9zdCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjQ1MTkyODI0LCJleHAiOjE5NjA3Njg4MjR9.M9jrxyvPLkUxWgOYSf5dNdJ8v_eWrqxOdFVbDTWO4is',
+    supabaseAnonKey: process.env.REACT_APP_SUPABASE_ANON_KEY || '',
   },
   api: {
     baseURL: process.env.REACT_APP_SUPABASE_URL 
