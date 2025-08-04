@@ -1,5 +1,2 @@
 # Netlify redirects for SPA routing
 /*    /index.html   200
-
-# API proxy (optional - for development)
-/api/*  http://localhost:8080/api/:splat  200
