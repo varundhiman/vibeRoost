@@ -1,77 +1,92 @@
-# Social Recommendation App
+# 🌟 VibeRoost - Social Recommendation Platform
 
-A modern social recommendation platform built with Supabase Edge Functions and React.
+A modern social platform for sharing and discovering recommendations for restaurants, movies, activities, and more. Built with React, TypeScript, and Supabase.
 
-## Architecture
+## ✨ Features
 
-This application uses a serverless architecture with Supabase Edge Functions:
+- 🔐 **User Authentication** - Secure signup/login with Supabase Auth
+- 👥 **Community-Based Recommendations** - Join communities and share recommendations
+- ⭐ **Review & Rating System** - Write detailed reviews with ratings
+- 📱 **Personalized Feed** - AI-powered content personalization
+- 🔍 **External API Integration** - Restaurant and movie data from Yelp & TMDB
+- 💬 **Social Interactions** - Like, comment, and follow other users
+- 🎨 **Modern UI** - Beautiful, responsive design with Tailwind CSS
 
-- **Edge Functions** - TypeScript/Deno serverless functions for all backend logic
-- **Supabase Database** - PostgreSQL database with Row Level Security (RLS)
-- **Supabase Auth** - Built-in authentication and user management
-- **Supabase Storage** - File storage for images and media
-- **React Frontend** - Modern React application with TypeScript
+## 🚀 Tech Stack
 
-### Edge Functions
+- **Frontend**: React 18, TypeScript, Tailwind CSS, Redux Toolkit
+- **Backend**: Supabase (PostgreSQL, Edge Functions, Auth, Storage)
+- **APIs**: Yelp API, TMDB API for external data
+- **Deployment**: Netlify (Frontend), Supabase (Backend)
+- **Development**: Vite, ESLint, Prettier
 
-- **Users** (`/functions/v1/users`) - User profile management and blocking
-- **Communities** (`/functions/v1/communities`) - Community CRUD and membership
-- **Reviews** (`/functions/v1/reviews`) - Review system and reviewable items
-- **Feed** (`/functions/v1/feed`) - Personalized feed generation
-- **External APIs** (`/functions/v1/external-apis`) - Movie and restaurant data integration
+## 📦 Project Structure
 
-## Prerequisites
+```
+├── frontend-shared/           # Shared TypeScript library
+│   ├── src/
+│   │   ├── api/              # API client and configuration
+│   │   ├── auth/             # Authentication services
+│   │   ├── services/         # Business logic services
+│   │   ├── store/            # Redux store and slices
+│   │   └── types/            # TypeScript type definitions
+├── web-app/                  # React web application
+│   ├── src/
+│   │   ├── components/       # Reusable UI components
+│   │   ├── pages/            # Page components
+│   │   └── App.tsx           # Main app component
+├── supabase/                 # Backend configuration
+│   ├── functions/            # Edge Functions (API endpoints)
+│   ├── migrations/           # Database schema migrations
+│   └── config.toml           # Supabase configuration
+├── scripts/                  # Development and deployment scripts
+└── docs/                     # Documentation files
+```
 
-- Node.js 18 or higher
+## 🛠️ Getting Started
+
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
 - Supabase CLI
-- Supabase account and project
+- Git
 
-## Local Development Setup
+### Installation
 
-### 1. Install Supabase CLI
-
+1. **Clone the repository**
 ```bash
+git clone https://github.com/varundhiman/vibeRoost.git
+cd vibeRoost
+```
+
+2. **Install dependencies**
+```bash
+# Install frontend shared library
+cd frontend-shared
+npm install
+npm run build
+
+# Install web app
+cd ../web-app
+npm install
+```
+
+3. **Set up Supabase**
+```bash
+# Install Supabase CLI
 npm install -g supabase
-```
 
-### 2. Configure Environment Variables
+# Login to Supabase
+supabase login
 
-Create a `.env.backend` file in the root directory:
+# Link to your project (replace with your project ID)
+supabase link --project-ref your-project-id
 
-```bash
-# Supabase Configuration
-SUPABASE_URL=your-supabase-url
-SUPABASE_ANON_KEY=your-supabase-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+# Push database migrations
+supabase db push
 
-# External API Keys
-GOOGLE_PLACES_API_KEY=your-google-places-api-key
-TMDB_API_KEY=your-tmdb-api-key
-```
-
-### 3. Start Supabase Local Development
-
-```bash
-# Start all Supabase services
-supabase start
-
-# Or use the convenience script
-./scripts/start-with-supabase.sh
-```
-
-This will start:
-- PostgreSQL database on port 54322
-- API Gateway on port 54321
-- Supabase Dashboard on port 54323
-- Edge Functions on port 54321/functions/v1
-
-### 4. Deploy Edge Functions (Local)
-
-```bash
-# Deploy all functions
-supabase functions deploy
-
-# Or deploy individual functions
+# Deploy Edge Functions
 supabase functions deploy users
 supabase functions deploy communities
 supabase functions deploy reviews
@@ -79,118 +94,131 @@ supabase functions deploy feed
 supabase functions deploy external-apis
 ```
 
-### 5. Start Frontend Development
-
+4. **Configure environment variables**
 ```bash
-# Install dependencies
-cd web-app
-npm install
+# Copy example files
+cp .env.example .env
+cp web-app/.env.example web-app/.env
 
-# Start development server
+# Update with your Supabase credentials
+# Get these from your Supabase Dashboard > Settings > API
+```
+
+5. **Start the development server**
+```bash
+# Use the production startup script
+./scripts/start-production.sh
+
+# Or manually:
+cd web-app
 npm start
 ```
 
-## Project Structure
+The app will be available at `http://localhost:3000`
 
-```
-social-recommendation-app/
-├── supabase/
-│   ├── functions/              # Edge Functions
-│   │   ├── users/             # User management
-│   │   ├── communities/       # Community management
-│   │   ├── reviews/           # Review system
-│   │   ├── feed/              # Feed generation
-│   │   ├── external-apis/     # External API integration
-│   │   └── _shared/           # Shared utilities
-│   └── migrations/            # Database migrations
-├── frontend-shared/           # Shared frontend library
-│   ├── src/
-│   │   ├── api/              # API client
-│   │   ├── auth/             # Authentication
-│   │   ├── services/         # Service classes
-│   │   ├── store/            # Redux store
-│   │   └── types/            # TypeScript types
-├── web-app/                   # React web application
-│   └── src/
-│       ├── components/       # React components
-│       ├── pages/           # Page components
-│       └── hooks/           # Custom hooks
-└── scripts/                  # Development scripts
+## 🔧 Environment Variables
+
+Create these environment files with your Supabase credentials:
+
+**`.env`** (Backend configuration):
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+SUPABASE_JWT_SECRET=your-jwt-secret
 ```
 
-## Technology Stack
+**`web-app/.env.local`** (Frontend configuration):
+```env
+REACT_APP_SUPABASE_URL=https://your-project.supabase.co
+REACT_APP_SUPABASE_ANON_KEY=your-anon-key
+REACT_APP_API_BASE_URL=https://your-project.supabase.co/functions/v1
+```
 
-- **Backend**: TypeScript, Deno, Supabase Edge Functions
-- **Database**: PostgreSQL with Supabase
-- **Authentication**: Supabase Auth
-- **Storage**: Supabase Storage
-- **Frontend**: React 18, TypeScript, Redux Toolkit
-- **Styling**: Tailwind CSS
-- **Build Tools**: Vite, npm
+## 🏗️ Architecture
 
-## API Endpoints
+### Frontend Architecture
+- **React 18** with TypeScript for type safety
+- **Redux Toolkit** for state management
+- **Tailwind CSS** for styling
+- **Shared Library** for reusable logic across apps
 
-All Edge Functions are available at `http://localhost:54321/functions/v1/`:
+### Backend Architecture
+- **Supabase Edge Functions** for API endpoints
+- **PostgreSQL** with Row Level Security (RLS)
+- **Real-time subscriptions** for live updates
+- **File storage** for user uploads
 
-- `GET/POST /users` - User profile management
-- `GET/POST /communities` - Community operations
-- `GET/POST /reviews` - Review system
-- `GET /feed` - Personalized feed
-- `GET /external-apis/movies/search` - Movie search
-- `GET /external-apis/restaurants/search` - Restaurant search
+### Key Features Implementation
+- **Authentication**: Supabase Auth with JWT tokens
+- **Database**: PostgreSQL with comprehensive schema
+- **API**: RESTful Edge Functions with TypeScript
+- **Real-time**: Supabase real-time subscriptions
+- **File Upload**: Supabase Storage integration
 
-## Development Guidelines
+## 📚 API Documentation
 
-1. Use TypeScript for all code
-2. Follow functional programming patterns in Edge Functions
-3. Implement proper error handling with standardized responses
-4. Use Row Level Security (RLS) for database access control
-5. Write tests for all Edge Functions
-6. Use environment variables for configuration
+The app includes comprehensive Edge Functions for:
 
-## Testing
+- **Users API** (`/functions/v1/users`) - User profiles and management
+- **Communities API** (`/functions/v1/communities`) - Community operations
+- **Reviews API** (`/functions/v1/reviews`) - Review CRUD operations
+- **Feed API** (`/functions/v1/feed`) - Personalized content feed
+- **External APIs** (`/functions/v1/external-apis`) - Restaurant/movie data
+
+## 🧪 Testing
 
 ```bash
-# Test Edge Functions
-cd supabase/functions
-deno test --allow-all
-
-# Test frontend shared library
+# Run frontend tests
 cd frontend-shared
 npm test
 
-# Test React application
-cd web-app
-npm test
+# Run Edge Function tests
+cd supabase/functions
+deno test --allow-all
 ```
 
-## Deployment
+## 🚀 Deployment
 
-### Edge Functions
+### Frontend (Netlify)
+1. Connect your GitHub repository to Netlify
+2. Set build command: `cd web-app && npm run build`
+3. Set publish directory: `web-app/build`
+4. Add environment variables in Netlify dashboard
+
+### Backend (Supabase)
 ```bash
-# Deploy to Supabase
-supabase functions deploy --project-ref your-project-ref
+# Deploy all functions
+supabase functions deploy
+
+# Set production secrets
+supabase secrets set JWT_SECRET=your-jwt-secret
+supabase secrets set SERVICE_ROLE_KEY=your-service-role-key
 ```
 
-### Frontend
-```bash
-# Build for production
-cd web-app
-npm run build
+## 🤝 Contributing
 
-# Deploy to your preferred hosting platform
-```
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## Migration from Java Services
+## 📄 License
 
-This project has been migrated from Java microservices to Supabase Edge Functions. The migration provides:
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-- **Simplified Architecture**: Single serverless platform instead of multiple Java services
-- **Better Performance**: Edge Functions with global distribution
-- **Reduced Complexity**: No need for service discovery, load balancing, or container orchestration
-- **Cost Efficiency**: Pay-per-use serverless model
-- **Built-in Features**: Authentication, database, and storage included
+## 🙏 Acknowledgments
 
-For migration details, see `frontend-shared/EDGE_FUNCTIONS_MIGRATION.md`.
+- [Supabase](https://supabase.com) for the amazing backend platform
+- [Tailwind CSS](https://tailwindcss.com) for the utility-first CSS framework
+- [Heroicons](https://heroicons.com) for the beautiful icons
+- [React](https://reactjs.org) team for the fantastic framework
 
+## 📞 Support
 
+If you have any questions or need help, please open an issue or contact the maintainers.
+
+---
+
+**Built with ❤️ by the VibeRoost team**
