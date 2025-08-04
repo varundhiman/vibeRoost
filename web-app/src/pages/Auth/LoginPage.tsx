@@ -4,22 +4,10 @@ import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
-import { SocialRecSDK, setUser } from '@socialrec/frontend-shared';
+import { setUser } from '@socialrec/frontend-shared';
+import { useSDK } from '../../contexts/SDKContext';
 import Button from '../../components/UI/Button';
 import Input from '../../components/UI/Input';
-
-// Get SDK instance (we'll need to pass this from App or create a context)
-const sdk = new SocialRecSDK({
-  auth: {
-    supabaseUrl: process.env.REACT_APP_SUPABASE_URL || 'http://localhost:54321',
-    supabaseAnonKey: process.env.REACT_APP_SUPABASE_ANON_KEY || '',
-  },
-  api: {
-    baseURL: process.env.REACT_APP_SUPABASE_URL 
-      ? `${process.env.REACT_APP_SUPABASE_URL}/functions/v1`
-      : 'http://localhost:54321/functions/v1',
-  },
-});
 
 interface LoginFormData {
   email: string;
@@ -30,6 +18,7 @@ const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const sdk = useSDK();
   
   const {
     register,
@@ -40,21 +29,29 @@ const LoginPage: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setLoading(true);
+      console.log('Attempting login with:', { email: data.email });
       
       const { user, error } = await sdk.auth.signIn(data.email, data.password);
       
+      console.log('Login result:', { user, error });
+      
       if (error) {
+        console.error('Login error:', error);
         toast.error(error.message || 'Invalid email or password');
         return;
       }
       
       if (user) {
+        console.log('Login successful, user:', user);
         dispatch(setUser(user));
         toast.success('Welcome back!');
         navigate('/dashboard');
+      } else {
+        console.warn('No user returned from login');
+        toast.error('Login failed - no user returned');
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Login exception:', error);
       toast.error('An unexpected error occurred');
     } finally {
       setLoading(false);

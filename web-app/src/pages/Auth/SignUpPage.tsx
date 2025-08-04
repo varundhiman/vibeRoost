@@ -4,22 +4,10 @@ import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
-import { SocialRecSDK, setUser } from '@socialrec/frontend-shared';
+import { setUser } from '@socialrec/frontend-shared';
+import { useSDK } from '../../contexts/SDKContext';
 import Button from '../../components/UI/Button';
 import Input from '../../components/UI/Input';
-
-// Get SDK instance
-const sdk = new SocialRecSDK({
-  auth: {
-    supabaseUrl: process.env.REACT_APP_SUPABASE_URL || 'http://localhost:54321',
-    supabaseAnonKey: process.env.REACT_APP_SUPABASE_ANON_KEY || '',
-  },
-  api: {
-    baseURL: process.env.REACT_APP_SUPABASE_URL 
-      ? `${process.env.REACT_APP_SUPABASE_URL}/functions/v1`
-      : 'http://localhost:54321/functions/v1',
-  },
-});
 
 interface SignUpFormData {
   email: string;
@@ -33,6 +21,7 @@ const SignUpPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const sdk = useSDK();
   
   const {
     register,
