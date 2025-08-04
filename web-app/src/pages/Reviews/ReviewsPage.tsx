@@ -10,6 +10,46 @@ import {
 import { useSDK } from '../../contexts/SDKContext';
 import Button from '../../components/UI/Button';
 
+// Mock data for fallback - moved outside component to avoid re-creation
+const mockReviews = [
+  {
+    id: 1,
+    title: 'Amazing Italian Experience',
+    item: 'Osteria Morini',
+    itemType: 'RESTAURANT',
+    rating: 5,
+    description: 'The pasta was incredible and the service was top-notch...',
+    author: 'You',
+    community: 'NYC Foodies',
+    createdAt: '2024-01-15',
+    photos: ['https://via.placeholder.com/300x200'],
+  },
+  {
+    id: 2,
+    title: 'Great Sci-Fi Film',
+    item: 'Dune: Part Two',
+    itemType: 'MOVIE',
+    rating: 4,
+    description: 'Visually stunning with great performances...',
+    author: 'Sarah Chen',
+    community: 'Film Buffs',
+    createdAt: '2024-01-14',
+    photos: [],
+  },
+  {
+    id: 3,
+    title: 'Solid Coffee Shop',
+    item: 'Blue Bottle Coffee',
+    itemType: 'RESTAURANT',
+    rating: 4,
+    description: 'Good coffee and atmosphere for working...',
+    author: 'Mike Johnson',
+    community: 'Coffee Connoisseurs',
+    createdAt: '2024-01-13',
+    photos: ['https://via.placeholder.com/300x200'],
+  },
+];
+
 const ReviewsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [reviews, setReviews] = useState<any[]>([]);
@@ -20,46 +60,6 @@ const ReviewsPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const sdk = useSDK();
-
-  // Mock data for fallback
-  const mockReviews = [
-    {
-      id: 1,
-      title: 'Amazing Italian Experience',
-      item: 'Osteria Morini',
-      itemType: 'RESTAURANT',
-      rating: 5,
-      description: 'The pasta was incredible and the service was top-notch...',
-      author: 'You',
-      community: 'NYC Foodies',
-      createdAt: '2024-01-15',
-      photos: ['https://via.placeholder.com/300x200'],
-    },
-    {
-      id: 2,
-      title: 'Great Sci-Fi Film',
-      item: 'Dune: Part Two',
-      itemType: 'MOVIE',
-      rating: 4,
-      description: 'Visually stunning with great performances...',
-      author: 'Sarah Chen',
-      community: 'Film Buffs',
-      createdAt: '2024-01-14',
-      photos: [],
-    },
-    {
-      id: 3,
-      title: 'Solid Coffee Shop',
-      item: 'Blue Bottle Coffee',
-      itemType: 'RESTAURANT',
-      rating: 4,
-      description: 'Good coffee and atmosphere for working...',
-      author: 'Mike Johnson',
-      community: 'Coffee Connoisseurs',
-      createdAt: '2024-01-13',
-      photos: ['https://via.placeholder.com/300x200'],
-    },
-  ];
 
   // Fetch reviews from API
   useEffect(() => {
