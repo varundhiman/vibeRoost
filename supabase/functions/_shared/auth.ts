@@ -22,11 +22,15 @@ export interface AuthContext {
 export async function getAuthUser(req: Request): Promise<AuthUser | null> {
   try {
     const authHeader = req.headers.get('Authorization')
+    console.log('Auth header:', authHeader ? 'Present' : 'Missing')
+    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('No valid auth header found')
       return null
     }
 
     const token = authHeader.replace('Bearer ', '')
+    console.log('Token length:', token.length)
     
     // Get JWT secret from environment
     const jwtSecret = Deno.env.get('SUPABASE_JWT_SECRET')
@@ -34,6 +38,7 @@ export async function getAuthUser(req: Request): Promise<AuthUser | null> {
       console.error('SUPABASE_JWT_SECRET not configured')
       return null
     }
+    console.log('JWT secret configured:', !!jwtSecret)
 
     // Verify and decode JWT token
     const key = await crypto.subtle.importKey(
@@ -44,8 +49,10 @@ export async function getAuthUser(req: Request): Promise<AuthUser | null> {
       ['verify']
     )
     const payload = await verify(token, key)
+    console.log('JWT verification result:', !!payload)
     
     if (!payload || typeof payload !== 'object') {
+      console.log('Invalid JWT payload')
       return null
     }
 
@@ -60,9 +67,11 @@ export async function getAuthUser(req: Request): Promise<AuthUser | null> {
 
     // Check if token is expired
     if (user.exp && user.exp < Date.now() / 1000) {
+      console.log('Token expired')
       return null
     }
 
+    console.log('Auth successful for user:', user.id)
     return user
   } catch (error) {
     console.error('Auth error:', error)
@@ -115,16 +124,57 @@ export function createSupabaseUserClient(user: AuthUser): SupabaseClient {
 }
 
 /**
- * Get authenticated context (user + supabase client)
+ * Get authenticated context (user + supabase client) - Alternative approach using Supabase client
  */
 export async function getAuthContext(req: Request): Promise<AuthContext | null> {
-  const user = await getAuthUser(req)
-  if (!user) {
+  try {
+    // Try the manual JWT approach first
+    const user = await getAuthUser(req)
+    if (user) {
+      const supabase = createSupabaseUserClient(user)
+      return { user, supabase }
+    }
+    
+    // Fallback: Use Supabase client to get user from token
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('No auth header for fallback approach')
+      return null
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Supabase configuration missing for fallback')
+      return null
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseAnonKey)
+    
+    // Set the auth token
+    const { data: { user: supabaseUser }, error } = await supabase.auth.getUser(token)
+    
+    if (error || !supabaseUser) {
+      console.log('Supabase auth fallback failed:', error?.message)
+      return null
+    }
+    
+    const user: AuthUser = {
+      id: supabaseUser.id,
+      email: supabaseUser.email,
+      role: supabaseUser.role || 'authenticated',
+      aud: supabaseUser.aud,
+      exp: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
+    }
+    
+    console.log('Supabase auth fallback successful for user:', user.id)
+    return { user, supabase }
+  } catch (error) {
+    console.error('Auth context error:', error)
     return null
   }
-  
-  const supabase = createSupabaseUserClient(user)
-  return { user, supabase }
 }
 
 /**
