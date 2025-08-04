@@ -8,7 +8,7 @@ import {
   UsersIcon
 } from '@heroicons/react/24/outline';
 import Button from '../../components/UI/Button';
-import Input from '../../components/UI/Input';
+// import Input from '../../components/UI/Input';
 
 const CommunitiesPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');

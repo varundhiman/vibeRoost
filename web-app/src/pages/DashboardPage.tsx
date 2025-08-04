@@ -8,7 +8,7 @@ import {
   StarIcon,
   ChatBubbleLeftRightIcon 
 } from '@heroicons/react/24/outline';
-import { selectUser, User } from '@socialrec/frontend-shared';
+import { selectUser } from '@socialrec/frontend-shared';
 import Button from '../components/UI/Button';
 
 const DashboardPage: React.FC = () => {

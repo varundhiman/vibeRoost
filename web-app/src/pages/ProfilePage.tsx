@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
-import { selectUser, User } from '@socialrec/frontend-shared';
+import { selectUser } from '@socialrec/frontend-shared';
 
 const ProfilePage: React.FC = () => {
   const user = useSelector(selectUser);

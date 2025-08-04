@@ -9,7 +9,7 @@ import {
   MagnifyingGlassIcon,
   ChevronDownIcon
 } from '@heroicons/react/24/outline';
-import { selectUser, clearAuth, User, SocialRecSDK } from '@socialrec/frontend-shared';
+import { selectUser, clearAuth, SocialRecSDK } from '@socialrec/frontend-shared';
 
 // Get SDK instance
 const sdk = new SocialRecSDK({
