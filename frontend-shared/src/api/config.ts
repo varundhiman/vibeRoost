@@ -5,10 +5,11 @@ export interface ApiConfig {
   retryDelay: number;
 }
 
+// Use hardcoded production Supabase URL for consistency
+const SUPABASE_URL = 'https://ovjsvutuyfuiomgwbfzt.supabase.co';
+
 export const defaultApiConfig: ApiConfig = {
-  baseURL: process.env.REACT_APP_SUPABASE_URL 
-    ? `${process.env.REACT_APP_SUPABASE_URL}/functions/v1`
-    : 'http://localhost:54321/functions/v1',
+  baseURL: `${SUPABASE_URL}/functions/v1`,
   timeout: 15000, // Increased timeout for Edge Functions
   retryAttempts: 3,
   retryDelay: 1000,

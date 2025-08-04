@@ -50,6 +50,24 @@ const CreateCommunityPage: React.FC = () => {
     try {
       setLoading(true);
       
+      // Debug authentication state
+      const currentUser = sdk.auth.getCurrentUser();
+      const isAuthenticated = sdk.auth.isAuthenticated();
+      const accessToken = await sdk.auth.getAccessToken();
+      
+      console.log('Authentication debug:', {
+        currentUser,
+        isAuthenticated,
+        hasAccessToken: !!accessToken,
+        accessTokenLength: accessToken?.length
+      });
+      
+      if (!isAuthenticated || !accessToken) {
+        toast.error('You must be logged in to create a community');
+        navigate('/login');
+        return;
+      }
+      
       const result = await sdk.communities.createCommunity({
         name: formData.name.trim(),
         description: formData.description.trim() || undefined,
@@ -57,6 +75,8 @@ const CreateCommunityPage: React.FC = () => {
         type: formData.type,
         is_private: formData.is_private
       });
+
+      console.log('Create community result:', result);
 
       if (result.success && result.data) {
         toast.success('Community created successfully!');

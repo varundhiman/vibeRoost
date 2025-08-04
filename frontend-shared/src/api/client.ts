@@ -36,10 +36,8 @@ export class ApiClient {
         }
         
         // Add Supabase-specific headers for Edge Functions
-        const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
-        if (supabaseAnonKey) {
-          config.headers.apikey = supabaseAnonKey;
-        }
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92anN2dXR1eWZ1aW9tZ3diZnp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxODYxOTYsImV4cCI6MjA2OTc2MjE5Nn0.7PcEOP5oTub9Yn4tN-a6DyyI7jd552oeu-MAAQKK_eI';
+        config.headers.apikey = supabaseAnonKey;
         
         return config;
       },

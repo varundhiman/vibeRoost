@@ -13,6 +13,7 @@ import AuthLayout from './components/Layout/AuthLayout';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/Auth/LoginPage';
 import SignUpPage from './pages/Auth/SignUpPage';
+import EmailVerificationPage from './pages/Auth/EmailVerificationPage';
 import DashboardPage from './pages/DashboardPage';
 import ProfilePage from './pages/ProfilePage';
 import CommunitiesPage from './pages/Communities/CommunitiesPage';
@@ -85,6 +86,12 @@ const AppContent: React.FC = () => {
           element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <SignUpPage />} 
         />
       </Route>
+      
+      {/* Email verification route - outside AuthLayout to avoid redirect loops */}
+      <Route 
+        path="/auth/verify" 
+        element={<EmailVerificationPage />} 
+      />
 
       {/* Protected routes */}
       <Route element={<Layout />}>

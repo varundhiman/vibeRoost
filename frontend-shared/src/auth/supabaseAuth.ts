@@ -54,6 +54,7 @@ export class SupabaseAuthService {
       password,
       options: {
         data: metadata,
+        emailRedirectTo: `${window.location.origin}/auth/verify`,
       },
     });
     return { user: this.convertToAppUser(data.user), error };
