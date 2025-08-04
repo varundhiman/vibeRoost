@@ -1,0 +1,25 @@
+{
+  "name": "viberoost",
+  "version": "1.0.0",
+  "description": "VibeRoost - Social Recommendation Platform",
+  "private": true,
+  "scripts": {
+    "build:netlify": "cd frontend-shared && npm ci && npm run build && cd ../web-app && npm ci && npm run build",
+    "start": "cd web-app && npm start",
+    "test": "cd frontend-shared && npm test && cd ../web-app && npm test"
+  },
+  "workspaces": [
+    "frontend-shared",
+    "web-app"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/varundhiman/vibeRoost.git"
+  },
+  "author": "VibeRoost Team",
+  "license": "MIT"
+}
