@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import toast from 'react-hot-toast';
 import { 
   PlusIcon,
   StarIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
+import { useSDK } from '../../contexts/SDKContext';
 import Button from '../../components/UI/Button';
 
 const ReviewsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [communities, setCommunities] = useState<any[]>([]);
+  const [selectedCommunity, setSelectedCommunity] = useState('');
+  const [selectedType, setSelectedType] = useState('');
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const sdk = useSDK();
 
-  // Mock data
-  const reviews = [
+  // Mock data for fallback
+  const mockReviews = [
     {
       id: 1,
       title: 'Amazing Italian Experience',
@@ -51,13 +61,76 @@ const ReviewsPage: React.FC = () => {
     },
   ];
 
+  // Fetch reviews from API
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setLoading(true);
+        const result = await sdk.reviews.getReviews(1, 20, selectedCommunity || undefined);
+        
+        if (result.success && result.data) {
+          setReviews(result.data.data || []);
+          setHasMore(result.data.pagination?.has_more || false);
+        } else {
+          console.error('Failed to fetch reviews:', result);
+          // Use mock data as fallback
+          setReviews(mockReviews);
+          setHasMore(false);
+        }
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+        // Use mock data as fallback
+        setReviews(mockReviews);
+        setHasMore(false);
+        toast.error('Failed to load reviews, showing sample data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, [sdk, selectedCommunity]);
+
+  // Fetch communities for filter
+  useEffect(() => {
+    const fetchCommunities = async () => {
+      try {
+        const result = await sdk.communities.getUserCommunities();
+        
+        if (result.success && result.data) {
+          setCommunities(result.data.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching communities:', error);
+      }
+    };
+
+    fetchCommunities();
+  }, [sdk]);
+
+  const loadMoreReviews = async () => {
+    try {
+      const nextPage = page + 1;
+      const result = await sdk.reviews.getReviews(nextPage, 20, selectedCommunity || undefined);
+      
+      if (result.success && result.data) {
+        setReviews(prev => [...prev, ...(result.data.data || [])]);
+        setPage(nextPage);
+        setHasMore(result.data.pagination?.has_more || false);
+      }
+    } catch (error) {
+      console.error('Error loading more reviews:', error);
+      toast.error('Failed to load more reviews');
+    }
+  };
+
   const ReviewCard: React.FC<{ review: any }> = ({ review }) => (
     <div className="bg-white border border-secondary-200 rounded-lg p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start space-x-4">
-        {review.photos.length > 0 && (
+        {(review.images || review.photos)?.length > 0 && (
           <img
-            src={review.photos[0]}
-            alt={review.item}
+            src={(review.images || review.photos)[0]}
+            alt={review.item || review.title}
             className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
           />
         )}
@@ -68,10 +141,10 @@ const ReviewsPage: React.FC = () => {
                 to={`/reviews/${review.id}`}
                 className="text-lg font-medium text-secondary-900 hover:text-primary-600"
               >
-                {review.title}
+                {review.title || 'Untitled Review'}
               </Link>
               <p className="text-sm text-secondary-600 mt-1">
-                {review.item} • {review.itemType.toLowerCase()}
+                {review.item || 'Unknown Item'} • {(review.itemType || 'unknown').toLowerCase()}
               </p>
             </div>
             <div className="flex items-center ml-4">
@@ -79,7 +152,7 @@ const ReviewsPage: React.FC = () => {
                 <StarIcon
                   key={i}
                   className={`h-4 w-4 ${
-                    i < review.rating
+                    i < (review.rating || 0)
                       ? 'text-yellow-400 fill-current'
                       : 'text-secondary-300'
                   }`}
@@ -89,16 +162,16 @@ const ReviewsPage: React.FC = () => {
           </div>
           
           <p className="text-sm text-secondary-700 mt-2 line-clamp-2">
-            {review.description}
+            {review.description || review.content || 'No description available'}
           </p>
           
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center space-x-4 text-sm text-secondary-500">
-              <span>By {review.author}</span>
+              <span>By {review.author || 'Unknown'}</span>
               <span>•</span>
-              <span className="text-primary-600">{review.community}</span>
+              <span className="text-primary-600">{review.community || 'Community'}</span>
               <span>•</span>
-              <span>{new Date(review.createdAt).toLocaleDateString()}</span>
+              <span>{new Date(review.createdAt || review.created_at).toLocaleDateString()}</span>
             </div>
           </div>
         </div>
@@ -150,36 +223,88 @@ const ReviewsPage: React.FC = () => {
           </div>
           
           <div className="flex space-x-2">
-            <select className="block w-full pl-3 pr-10 py-2 text-base border-secondary-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md">
-              <option>All Types</option>
-              <option>Restaurants</option>
-              <option>Movies</option>
-              <option>Services</option>
-              <option>Activities</option>
+            <select 
+              className="block w-full pl-3 pr-10 py-2 text-base border-secondary-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md"
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+            >
+              <option value="">All Types</option>
+              <option value="RESTAURANT">Restaurants</option>
+              <option value="MOVIE">Movies</option>
+              <option value="TV_SHOW">TV Shows</option>
+              <option value="SERVICE">Services</option>
+              <option value="ACTIVITY">Activities</option>
+              <option value="VACATION_SPOT">Vacation Spots</option>
+              <option value="RECIPE">Recipes</option>
             </select>
             
-            <select className="block w-full pl-3 pr-10 py-2 text-base border-secondary-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md">
-              <option>All Communities</option>
-              <option>NYC Foodies</option>
-              <option>Film Buffs</option>
-              <option>Tech Reviews</option>
+            <select 
+              className="block w-full pl-3 pr-10 py-2 text-base border-secondary-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md"
+              value={selectedCommunity}
+              onChange={(e) => setSelectedCommunity(e.target.value)}
+            >
+              <option value="">All Communities</option>
+              {communities.map((community) => (
+                <option key={community.id} value={community.id}>
+                  {community.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>
 
         {/* Reviews List */}
-        <div className="space-y-4">
-          {reviews.map((review) => (
-            <ReviewCard key={review.id} review={review} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white border border-secondary-200 rounded-lg p-6 animate-pulse">
+                <div className="flex items-start space-x-4">
+                  <div className="w-20 h-20 bg-secondary-200 rounded-lg flex-shrink-0"></div>
+                  <div className="flex-1 min-w-0">
+                    <div className="h-4 bg-secondary-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-secondary-200 rounded w-1/2 mb-4"></div>
+                    <div className="h-3 bg-secondary-200 rounded w-full mb-2"></div>
+                    <div className="h-3 bg-secondary-200 rounded w-2/3"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : reviews.length > 0 ? (
+          <div className="space-y-4">
+            {reviews.map((review) => (
+              <ReviewCard key={review.id} review={review} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <div className="text-secondary-400 mb-4">
+              <StarIcon className="mx-auto h-12 w-12" />
+            </div>
+            <h3 className="text-lg font-medium text-secondary-900 mb-2">No reviews found</h3>
+            <p className="text-secondary-600 mb-6">
+              {selectedCommunity || selectedType 
+                ? 'Try adjusting your filters or create the first review for this selection.'
+                : 'Be the first to write a review in your communities!'
+              }
+            </p>
+            <Link to="/reviews/create">
+              <Button>
+                <PlusIcon className="h-5 w-5 mr-2" />
+                Write First Review
+              </Button>
+            </Link>
+          </div>
+        )}
 
         {/* Load More */}
-        <div className="text-center">
-          <Button variant="outline">
-            Load More Reviews
-          </Button>
-        </div>
+        {!loading && reviews.length > 0 && hasMore && (
+          <div className="text-center">
+            <Button variant="outline" onClick={loadMoreReviews}>
+              Load More Reviews
+            </Button>
+          </div>
+        )}
       </div>
     </>
   );

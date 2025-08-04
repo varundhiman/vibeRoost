@@ -5,9 +5,9 @@ import {
   selectIsAuthenticated, 
   selectAuthLoading,
   setUser,
-  setLoading,
-  SocialRecSDK 
+  setLoading
 } from '@socialrec/frontend-shared';
+import { SDKProvider, useSDK } from './contexts/SDKContext';
 import Layout from './components/Layout/Layout';
 import AuthLayout from './components/Layout/AuthLayout';
 import HomePage from './pages/HomePage';
@@ -24,23 +24,11 @@ import SettingsPage from './pages/SettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import LoadingSpinner from './components/UI/LoadingSpinner';
 
-// Initialize SDK
-const sdk = new SocialRecSDK({
-  auth: {
-    supabaseUrl: process.env.REACT_APP_SUPABASE_URL || 'http://localhost:54321',
-    supabaseAnonKey: process.env.REACT_APP_SUPABASE_ANON_KEY || '',
-  },
-  api: {
-    baseURL: process.env.REACT_APP_SUPABASE_URL 
-      ? `${process.env.REACT_APP_SUPABASE_URL}/functions/v1`
-      : 'http://localhost:54321/functions/v1',
-  },
-});
-
-function App() {
+const AppContent: React.FC = () => {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const isLoading = useSelector(selectAuthLoading);
+  const sdk = useSDK();
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -70,7 +58,7 @@ function App() {
     return () => {
       cleanup.then(unsubscribe => unsubscribe?.());
     };
-  }, [dispatch]);
+  }, [dispatch, sdk]);
 
   if (isLoading) {
     return (
@@ -136,6 +124,14 @@ function App() {
       {/* 404 route */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
+  );
+};
+
+function App() {
+  return (
+    <SDKProvider>
+      <AppContent />
+    </SDKProvider>
   );
 }
 

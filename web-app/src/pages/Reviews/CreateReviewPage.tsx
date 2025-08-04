@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Helmet } from 'react-helmet-async';
@@ -9,6 +9,7 @@ import {
   PhotoIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
+import { useSDK } from '../../contexts/SDKContext';
 import Button from '../../components/UI/Button';
 import Input from '../../components/UI/Input';
 
@@ -26,7 +27,10 @@ const CreateReviewPage: React.FC = () => {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [communities, setCommunities] = useState<any[]>([]);
+  const [communitiesLoading, setCommunitiesLoading] = useState(true);
   const navigate = useNavigate();
+  const sdk = useSDK();
 
   const {
     register,
@@ -44,6 +48,30 @@ const CreateReviewPage: React.FC = () => {
     },
   });
 
+  // Fetch user's communities on component mount
+  useEffect(() => {
+    const fetchCommunities = async () => {
+      try {
+        setCommunitiesLoading(true);
+        const result = await sdk.communities.getUserCommunities();
+        
+        if (result.success && result.data) {
+          setCommunities(result.data.data || []);
+        } else {
+          console.error('Failed to fetch communities:', result);
+          toast.error('Failed to load communities');
+        }
+      } catch (error) {
+        console.error('Error fetching communities:', error);
+        toast.error('Failed to load communities');
+      } finally {
+        setCommunitiesLoading(false);
+      }
+    };
+
+    fetchCommunities();
+  }, [sdk]);
+
   const removeFile = (index: number) => {
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
@@ -54,20 +82,56 @@ const CreateReviewPage: React.FC = () => {
       return;
     }
 
+    if (!data.communities || data.communities.length === 0) {
+      toast.error('Please select at least one community to share with');
+      return;
+    }
+
     try {
       setLoading(true);
       
-      // TODO: Implement actual review creation with SDK
-      console.log('Creating review:', { ...data, rating, photos: uploadedFiles });
+      // First, create or find the reviewable item
+      const itemData = {
+        type: data.itemType as any,
+        title: data.itemName,
+        description: data.description,
+      };
+
+      const itemResult = await sdk.reviews.createReviewableItem(itemData);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!itemResult.success || !itemResult.data) {
+        throw new Error('Failed to create reviewable item');
+      }
+
+      // Create reviews for each selected community
+      const reviewPromises = data.communities.map(async (communityId) => {
+        const reviewData = {
+          item_id: itemResult.data.id,
+          community_id: communityId,
+          rating: rating,
+          title: data.title,
+          content: data.description,
+          is_public: true,
+          // TODO: Handle image uploads
+        };
+
+        return sdk.reviews.createReview(reviewData);
+      });
+
+      const results = await Promise.all(reviewPromises);
+      
+      // Check if all reviews were created successfully
+      const failedReviews = results.filter(result => !result.success);
+      
+      if (failedReviews.length > 0) {
+        throw new Error(`Failed to create ${failedReviews.length} review(s)`);
+      }
       
       toast.success('Review created successfully!');
       navigate('/reviews');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Create review error:', error);
-      toast.error('Failed to create review');
+      toast.error(error.message || 'Failed to create review');
     } finally {
       setLoading(false);
     }
@@ -246,21 +310,34 @@ const CreateReviewPage: React.FC = () => {
               {/* Communities */}
               <div>
                 <label className="block text-sm font-medium text-secondary-700">
-                  Share with Communities
+                  Share with Communities *
                 </label>
-                <div className="mt-2 space-y-2">
-                  {['NYC Foodies', 'Film Buffs', 'Tech Reviews'].map((community) => (
-                    <label key={community} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        value={community}
-                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded"
-                        {...register('communities')}
-                      />
-                      <span className="ml-2 text-sm text-secondary-700">{community}</span>
-                    </label>
-                  ))}
-                </div>
+                {communitiesLoading ? (
+                  <div className="mt-2 text-sm text-secondary-500">Loading communities...</div>
+                ) : communities.length > 0 ? (
+                  <div className="mt-2 space-y-2">
+                    {communities.map((community) => (
+                      <label key={community.id} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          value={community.id}
+                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded"
+                          {...register('communities', {
+                            required: 'Please select at least one community'
+                          })}
+                        />
+                        <span className="ml-2 text-sm text-secondary-700">{community.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-2 text-sm text-secondary-500">
+                    No communities found. You need to join communities to share reviews.
+                  </div>
+                )}
+                {errors.communities && (
+                  <p className="mt-1 text-sm text-red-600">{errors.communities.message}</p>
+                )}
               </div>
 
               {/* Submit Buttons */}
