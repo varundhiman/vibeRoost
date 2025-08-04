@@ -95,7 +95,7 @@ const ReviewsPage: React.FC = () => {
   useEffect(() => {
     const fetchCommunities = async () => {
       try {
-        const result = await sdk.communities.getUserCommunities();
+        const result = await sdk.communities.getCommunities();
         
         if (result.success && result.data) {
           setCommunities(result.data.data || []);

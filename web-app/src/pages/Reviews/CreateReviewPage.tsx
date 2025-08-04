@@ -53,7 +53,7 @@ const CreateReviewPage: React.FC = () => {
     const fetchCommunities = async () => {
       try {
         setCommunitiesLoading(true);
-        const result = await sdk.communities.getUserCommunities();
+        const result = await sdk.communities.getCommunities();
         
         if (result.success && result.data) {
           setCommunities(result.data.data || []);
