@@ -124,40 +124,57 @@ export function createSupabaseUserClient(user: AuthUser): SupabaseClient {
 }
 
 /**
- * Get authenticated context (user + supabase client) - Alternative approach using Supabase client
+ * Get authenticated context (user + supabase client) - Simplified approach using Supabase client
  */
 export async function getAuthContext(req: Request): Promise<AuthContext | null> {
   try {
-    // Try the manual JWT approach first
-    const user = await getAuthUser(req)
-    if (user) {
-      const supabase = createSupabaseUserClient(user)
-      return { user, supabase }
-    }
+    console.log('=== Getting Auth Context ===')
     
-    // Fallback: Use Supabase client to get user from token
     const authHeader = req.headers.get('Authorization')
+    const apiKeyHeader = req.headers.get('apikey')
+    
+    console.log('Headers check:', {
+      hasAuthHeader: !!authHeader,
+      hasApiKeyHeader: !!apiKeyHeader,
+      authHeaderFormat: authHeader?.startsWith('Bearer ') ? 'Valid Bearer' : 'Invalid format'
+    })
+    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('No auth header for fallback approach')
+      console.log('Missing or invalid Authorization header')
       return null
     }
 
     const token = authHeader.replace('Bearer ', '')
+    console.log('Token extracted, length:', token.length)
+    
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
     
+    console.log('Environment check:', {
+      hasSupabaseUrl: !!supabaseUrl,
+      hasSupabaseAnonKey: !!supabaseAnonKey
+    })
+    
     if (!supabaseUrl || !supabaseAnonKey) {
-      console.error('Supabase configuration missing for fallback')
+      console.error('Missing Supabase environment variables')
       return null
     }
     
+    // Create Supabase client
     const supabase = createClient(supabaseUrl, supabaseAnonKey)
+    console.log('Supabase client created')
     
-    // Set the auth token
+    // Verify the user token
     const { data: { user: supabaseUser }, error } = await supabase.auth.getUser(token)
     
+    console.log('Auth verification result:', {
+      hasUser: !!supabaseUser,
+      hasError: !!error,
+      errorMessage: error?.message
+    })
+    
     if (error || !supabaseUser) {
-      console.log('Supabase auth fallback failed:', error?.message)
+      console.log('Authentication failed:', error?.message || 'No user returned')
       return null
     }
     
@@ -169,7 +186,7 @@ export async function getAuthContext(req: Request): Promise<AuthContext | null> 
       exp: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
     }
     
-    console.log('Supabase auth fallback successful for user:', user.id)
+    console.log('Authentication successful for user:', user.id)
     return { user, supabase }
   } catch (error) {
     console.error('Auth context error:', error)

@@ -191,36 +191,37 @@ async function listCommunities(req: Request): Promise<Response> {
  * Debug authentication endpoint
  */
 async function debugAuth(req: Request): Promise<Response> {
+  console.log('=== DEBUG AUTH ENDPOINT ===')
+  
   try {
-    console.log('=== DEBUG AUTH ENDPOINT ===')
-    const authHeader = req.headers.get('Authorization')
-    const apiKeyHeader = req.headers.get('apikey')
-    
-    console.log('Headers:', {
-      authorization: authHeader ? 'Present' : 'Missing',
-      apikey: apiKeyHeader ? 'Present' : 'Missing'
-    })
-    
     const context = await getAuthContext(req)
     
-    if (context) {
-      return createSuccessResponse({
-        authenticated: true,
-        user: context.user,
-        message: 'Authentication successful'
-      })
-    } else {
-      return createSuccessResponse({
-        authenticated: false,
-        message: 'Authentication failed'
-      })
+    const result = {
+      authenticated: !!context,
+      user: context?.user || null,
+      message: context ? 'Authentication successful' : 'Authentication failed',
+      timestamp: new Date().toISOString()
     }
+    
+    console.log('Debug result:', result)
+    
+    return new Response(JSON.stringify({ data: result }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    })
   } catch (error) {
     console.error('Debug auth error:', error)
-    return createSuccessResponse({
+    
+    const errorResult = {
       authenticated: false,
       error: error.message,
-      message: 'Authentication error'
+      message: 'Authentication error',
+      timestamp: new Date().toISOString()
+    }
+    
+    return new Response(JSON.stringify({ data: errorResult }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
     })
   }
 }
