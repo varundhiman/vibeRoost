@@ -46,6 +46,11 @@ serve(withErrorHandling(async (req: Request): Promise<Response> => {
   const communityId = pathSegments[pathSegments.length - 1]
   const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(communityId)
   
+  // Add debug endpoint
+  if (method === 'GET' && url.pathname.endsWith('/debug-auth')) {
+    return await debugAuth(req)
+  }
+  
   switch (method) {
     case 'GET':
       if (isUUID) {
@@ -180,6 +185,44 @@ async function listCommunities(req: Request): Promise<Response> {
   }
   
   return createSuccessResponse(response)
+}
+
+/**
+ * Debug authentication endpoint
+ */
+async function debugAuth(req: Request): Promise<Response> {
+  try {
+    console.log('=== DEBUG AUTH ENDPOINT ===')
+    const authHeader = req.headers.get('Authorization')
+    const apiKeyHeader = req.headers.get('apikey')
+    
+    console.log('Headers:', {
+      authorization: authHeader ? 'Present' : 'Missing',
+      apikey: apiKeyHeader ? 'Present' : 'Missing'
+    })
+    
+    const context = await getAuthContext(req)
+    
+    if (context) {
+      return createSuccessResponse({
+        authenticated: true,
+        user: context.user,
+        message: 'Authentication successful'
+      })
+    } else {
+      return createSuccessResponse({
+        authenticated: false,
+        message: 'Authentication failed'
+      })
+    }
+  } catch (error) {
+    console.error('Debug auth error:', error)
+    return createSuccessResponse({
+      authenticated: false,
+      error: error.message,
+      message: 'Authentication error'
+    })
+  }
 }
 
 /**

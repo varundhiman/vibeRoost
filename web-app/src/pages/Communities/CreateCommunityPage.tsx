@@ -68,6 +68,31 @@ const CreateCommunityPage: React.FC = () => {
         return;
       }
       
+      // Test authentication with debug endpoint
+      try {
+        console.log('Testing authentication with debug endpoint...');
+        const debugResponse = await fetch('https://ovjsvutuyfuiomgwbfzt.supabase.co/functions/v1/communities/debug-auth', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92anN2dXR1eWZ1aW9tZ3diZnp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxODYxOTYsImV4cCI6MjA2OTc2MjE5Nn0.7PcEOP5oTub9Yn4tN-a6DyyI7jd552oeu-MAAQKK_eI',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const debugResult = await debugResponse.json();
+        console.log('Debug endpoint result:', debugResult);
+        
+        if (!debugResult.data?.authenticated) {
+          toast.error('Authentication test failed - check console for details');
+          return;
+        }
+      } catch (debugError) {
+        console.error('Debug endpoint error:', debugError);
+        toast.error('Authentication test failed - check console for details');
+        return;
+      }
+      
       const result = await sdk.communities.createCommunity({
         name: formData.name.trim(),
         description: formData.description.trim() || undefined,
