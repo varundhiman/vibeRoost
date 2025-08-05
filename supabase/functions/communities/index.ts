@@ -37,47 +37,62 @@ import {
   CommunityType
 } from '../_shared/types.ts'
 
-serve(withErrorHandling(async (req: Request): Promise<Response> => {
+serve(async (req: Request): Promise<Response> => {
   const url = new URL(req.url)
   const method = req.method
-  const pathSegments = url.pathname.split('/').filter(Boolean)
   
-  // Extract community ID from path if present
-  const communityId = pathSegments[pathSegments.length - 1]
-  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(communityId)
-  
-  // Add debug endpoint
+  // Handle debug endpoints first - completely bypass error handling
   if (method === 'GET' && url.pathname.endsWith('/debug-auth')) {
     return await debugAuth(req)
   }
   
-  switch (method) {
-    case 'GET':
-      if (isUUID) {
-        return await getCommunity(req, communityId)
-      } else {
-        return await listCommunities(req)
-      }
-    
-    case 'POST':
-      return await createCommunity(req)
-    
-    case 'PUT':
-      if (!isUUID) {
-        throw new NotFoundError('Community', communityId)
-      }
-      return await updateCommunity(req, communityId)
-    
-    case 'DELETE':
-      if (!isUUID) {
-        throw new NotFoundError('Community', communityId)
-      }
-      return await deleteCommunity(req, communityId)
-    
-    default:
-      return new Response('Method not allowed', { status: 405 })
+  if (method === 'GET' && url.pathname.endsWith('/ping')) {
+    return new Response(JSON.stringify({ 
+      message: 'pong', 
+      timestamp: new Date().toISOString(),
+      headers: Object.fromEntries(req.headers.entries())
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    })
   }
-}))
+  
+  // All other endpoints use error handling
+  return withErrorHandling(async (req: Request): Promise<Response> => {
+    const pathSegments = url.pathname.split('/').filter(Boolean)
+    
+    // Extract community ID from path if present
+    const communityId = pathSegments[pathSegments.length - 1]
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(communityId)
+    
+    switch (method) {
+      case 'GET':
+        if (isUUID) {
+          return await getCommunity(req, communityId)
+        } else {
+          return await listCommunities(req)
+        }
+      
+      case 'POST':
+        return await createCommunity(req)
+      
+      case 'PUT':
+        if (!isUUID) {
+          throw new NotFoundError('Community', communityId)
+        }
+        return await updateCommunity(req, communityId)
+      
+      case 'DELETE':
+        if (!isUUID) {
+          throw new NotFoundError('Community', communityId)
+        }
+        return await deleteCommunity(req, communityId)
+      
+      default:
+        return new Response('Method not allowed', { status: 405 })
+    }
+  })(req)
+})
 
 /**
  * Get a single community by ID

@@ -68,6 +68,23 @@ const CreateCommunityPage: React.FC = () => {
         return;
       }
       
+      // Test basic connectivity first
+      try {
+        console.log('Testing basic connectivity...');
+        const pingResponse = await fetch('https://ovjsvutuyfuiomgwbfzt.supabase.co/functions/v1/communities/ping', {
+          method: 'GET',
+          headers: {
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92anN2dXR1eWZ1aW9tZ3diZnp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxODYxOTYsImV4cCI6MjA2OTc2MjE5Nn0.7PcEOP5oTub9Yn4tN-a6DyyI7jd552oeu-MAAQKK_eI',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const pingResult = await pingResponse.json();
+        console.log('Ping result:', pingResult);
+      } catch (pingError) {
+        console.error('Ping error:', pingError);
+      }
+      
       // Test authentication with debug endpoint
       try {
         console.log('Testing authentication with debug endpoint...');
